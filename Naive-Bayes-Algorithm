@@ -1,34 +1,114 @@
-from sklearn.neighbors import  KNeighborsClassifier
-from sklearn.model_selection import train_test_split
-from sklearn import metrics
-import pandas as pd
-# Import LabelEncoder
-from sklearn import preprocessing
-#Import Gaussian Naive Bayes model
+from sklearn import datasets
 from sklearn.naive_bayes import GaussianNB
-# Assigning features and label variables
-weather=['Sunny','Sunny','Overcast','Rainy','Rainy','Rainy','Overcast','Sunny','Sunny',
-'Rainy','Sunny','Overcast','Overcast','Rainy']
-temp=['Hot','Hot','Hot','Mild','Cool','Cool','Cool','Mild','Cool','Mild','Mild','Mild','Hot','Mild']
+#Load dataset
+wine = datasets.load_wine()
 
-play=['No','No','Yes','Yes','Yes','No','Yes','No','Yes','Yes','Yes','Yes','Yes','No']
+#Features
+print("features: ",wine.feature_names)
 
-#creating labelEncoder
-le = preprocessing.LabelEncoder()
-# Converting string labels into numbers.
-wheather_encoded=le.fit_transform(weather)
-temp_encoded=le.fit_transform(temp)
-label=le.fit_transform(play)
+#Labels
+print("labels: ",wine.target_names)
 
-#Combinig weather and temp into single listof tuples
-features=list(zip(wheather_encoded,temp_encoded))
+#Exploring data
+print(wine.data.shape)
 
-#Create a Gaussian Classifier
-model = GaussianNB()
+#print top 5 records
+print(wine.data[0:5])
 
-# Train the model using the training sets
-model.fit(features,label)
+#print the wine labels (0:Class_0, 1:class_2, 2:class_2)
+print (wine.target)
 
-#Predict Output
-predicted= model.predict([[0,2]]) # 0:Overcast, 2:Mild
-print( "Predicted Value[0:no,1:yes]=>", predicted)
+#Split dataset 
+from sklearn.model_selection import train_test_split #train_test_split is now in model_selection
+
+X_train, X_test, y_train, y_test = train_test_split(wine.data, wine.target, test_size=0.3,random_state=109)
+#This is to check and validate the data when running the code multiple times. Setting random_state a fixed
+#value will guarantee that same sequence of random numbers are generated each time you run the code.
+
+#Model Generation
+gnb = GaussianNB()
+gnb.fit(X_train,y_train)
+y_pred = gnb.predict(X_test)
+
+#Accuracy Calculation
+from sklearn import metrics
+print("Accuracy", metrics.accuracy_score(y_pred,y_test))
+
+#https://towardsdatascience.com/beyond-accuracy-precision-and-recall-3da06bea9f6c
+# 50:50
+X_train, X_test, y_train, y_test = train_test_split(wine.data, wine.target, test_size=0.5,random_state=109)
+gnb.fit(X_train,y_train)
+y_pred = gnb.predict(X_test)
+pre_50 = metrics.precision_score(y_test,y_pred,average = 'macro')# Calculate metrics for each label, and find their unweighted mean. This does not take label imbalance into account.
+re_50 = metrics.recall_score(y_test,y_pred,average = 'macro')
+print("Precision: ",pre_50)
+print("Recall: ",re_50)
+
+# 60:40
+X_train, X_test, y_train, y_test = train_test_split(wine.data, wine.target, test_size=0.4,random_state=109)
+gnb.fit(X_train,y_train)
+y_pred = gnb.predict(X_test)
+pre_40 = metrics.precision_score(y_test,y_pred,average = 'macro')# Calculate metrics for each label, and find their unweighted mean. This does not take label imbalance into account.
+re_40 = metrics.recall_score(y_test,y_pred,average = 'macro')
+print("Precision: ",pre_40)
+print("Recall: ",re_40)
+
+# 70:30
+X_train, X_test, y_train, y_test = train_test_split(wine.data, wine.target, test_size=0.3,random_state=109)
+gnb.fit(X_train,y_train)
+y_pred = gnb.predict(X_test)
+pre_30 = metrics.precision_score(y_test,y_pred,average = 'macro')# Calculate metrics for each label, and find their unweighted mean. This does not take label imbalance into account.
+re_30 = metrics.recall_score(y_test,y_pred,average = 'macro')
+#print(re_30)
+print("Precision: ",pre_30)
+print("Recall: ",re_30)
+
+# 80:20
+X_train, X_test, y_train, y_test = train_test_split(wine.data, wine.target, test_size=0.2,random_state=109)
+gnb.fit(X_train,y_train)
+y_pred = gnb.predict(X_test)
+pre_20 = metrics.precision_score(y_test,y_pred,average = 'macro')# Calculate metrics for each label, and find their unweighted mean. This does not take label imbalance into account.
+re_20 = metrics.recall_score(y_test,y_pred,average = 'macro')
+print("Precision: ",pre_20)
+print("Recall: ",re_20)
+
+# 90:10
+X_train, X_test, y_train, y_test = train_test_split(wine.data, wine.target, test_size=0.1,random_state=109)
+gnb.fit(X_train,y_train)
+y_pred = gnb.predict(X_test)
+pre_10 = metrics.precision_score(y_test,y_pred,average = 'macro')# Calculate metrics for each label, and find their unweighted mean. This does not take label imbalance into account.
+re_10 = metrics.recall_score(y_test,y_pred,average = 'macro')
+print("Precision: ",pre_10)
+print("Recall: ",re_10)
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+n_groups = 5
+precisions = (pre_50, pre_40, pre_30, pre_20, pre_10)#tuple(immutable Python objects)
+recalls = (re_50, re_40, re_30, re_20, re_10)#tuple
+
+fig,ax = plt.subplots()#creates one figure with one subplot
+index = np.arange(n_groups)#for labels on X-axis and number of subplots(values between 0 and 1)
+bar_width = 0.35
+opacity = 0.8
+
+#plt.bar(x,height,bar_width)
+plt.bar(index,precisions,bar_width,alpha=opacity,color='r',label='Precision')
+plt.bar(index+bar_width,recalls,bar_width,alpha=opacity,color='b',label='Recall')
+#both the subplots have no labels on X-axis or Y-axis
+#index_bar_width to distinct subplots in a group
+
+plt.xlabel('Different split ratios')
+plt.ylabel('Precision and Recall')
+plt.title('Precision and Recall of different splits')
+#No labels till now for subplots
+plt.xticks(index+bar_width,('50:50','60:40','70:30','80:20','90:10'))
+# xticks()-Get or set the current tick locations and labels of the x-axis.
+#xticks(ticks, [labels], **kwargs)  # Set locations and labels
+
+plt.legend() #for showing what different colors represent
+
+plt.tight_layout()
+plt.show()
+
