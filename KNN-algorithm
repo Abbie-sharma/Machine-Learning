@@ -1,0 +1,25 @@
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(df,label,test_size = 0.4,random_state = 123)
+
+from sklearn.neighbors import  KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+accuracy=[]
+k=[]
+
+for i in range(1,10,2):
+       alg = KNeighborsClassifier(n_neighbors=i)  
+       alg.fit(X_train,y_train)              #Fit the estimator
+       result = alg.predict(X_test)
+       k.append(i)
+       accuracy.append(accuracy_score(y_test,result))
+
+print ("Values of K: " + str(k))
+print ("Accuracy scores: " + str(accuracy))
+
+import matplotlib.pyplot as plt
+plt.plot(k,accuracy, alpha=0.8, color='red')
+plt.xticks(k)
+plt.xlabel("Value of K")
+plt.ylabel("Accuracy score")
+plt.show()
