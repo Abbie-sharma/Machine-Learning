@@ -1,0 +1,49 @@
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk.tokenize import RegexpTokenizer
+from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import MultinomialNB
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+#read the dataset
+data = pd.read_csv("train.tsv", sep = '\t')
+#convert the data from the regular expressions into tokens
+token = RegexpTokenizer(r'[a-zA-Z0-9]+')
+
+#remove the stopwords from the data to get required tokens
+cv = CountVectorizer(stop_words="english", tokenizer = token.tokenize)
+
+#fit the data into the model
+text_counts_1 = cv.fit_transform(data['Phrase'])
+sizes = [0.5,0.6,0.7,0.8,0.9]
+model = MultinomialNB()
+accuracy_1 = []
+#train data
+for size in sizes:
+    X_train_1, X_test_1, Y_train_1, Y_test_1 = train_test_split(text_counts_1, data['Sentiment'], train_size = size)
+    model.fit(X_train_1,Y_train_1)
+    Y_predict_1 = model.predict(X_test_1)
+    accuracy_1.append(metrics.accuracy_score(Y_test_1,Y_predict_1)*100)
+
+tf = TfidfVectorizer()
+text_counts_2 = tf.fit_transform(data['Phrase'])
+accuracy_2 = []
+for size in sizes:
+    X_train_2, X_test_2, Y_train_2, Y_test_2 = train_test_split(text_counts_2, data['Sentiment'], train_size = size)
+    model.fit(X_train_2,Y_train_2)
+    Y_predict_2 = model.predict(X_test_2)
+    accuracy_2.append(metrics.accuracy_score(Y_test_2,Y_predict_2)*100)
+
+import matplotlib.pyplot as plt
+    
+config = ['50:50','60:40','70:30','80:20','90:10']
+fig, (ax1, ax2) = plt.subplots(1,2)
+ax1.plot(config,accuracy_1)
+ax1.set(xlabel = 'Configurations', ylabel = 'Accuracies')
+ax1.set_title('Using Document Term Matrix')
+
+ax2.plot(config,accuracy_2)
+ax2.set(xlabel = 'Configurations', ylabel = 'Accuracies')
+ax2.set_title('Using TF-IDF')
+plt.show()
